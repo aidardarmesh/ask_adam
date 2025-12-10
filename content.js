@@ -64,50 +64,24 @@
     .adam-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
     .adam-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
     
-    .adam-collapsible {
+    .adam-response {
       margin-top: 10px;
+      padding: 12px;
+      background: #f8f9fa;
       border: 1px solid #e0e0e0;
       border-radius: 6px;
-      overflow: hidden;
-    }
-    .adam-collapsible-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: #f5f5f5;
-      cursor: pointer;
-      user-select: none;
-      font-size: 13px;
-      font-weight: 500;
-      color: #333;
-    }
-    .adam-collapsible-header:hover {
-      background: #ebebeb;
-    }
-    .adam-collapsible-arrow {
-      transition: transform 0.2s ease;
-      font-size: 10px;
-    }
-    .adam-collapsible.expanded .adam-collapsible-arrow {
-      transform: rotate(180deg);
-    }
-    .adam-collapsible-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    .adam-collapsible.expanded .adam-collapsible-content {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .adam-collapsible-body {
-      padding: 12px;
       font-size: 14px;
       line-height: 1.5;
       color: #333;
       white-space: pre-wrap;
       word-wrap: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .adam-response.error {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
     }
   `;
   document.head.appendChild(style);
@@ -214,7 +188,7 @@
         const container = document.getElementById("adam-ask-container");
 
         // Remove existing response block if any
-        const existingResponse = container.querySelector(".adam-collapsible");
+        const existingResponse = container.querySelector(".adam-response");
         if (existingResponse) {
           existingResponse.remove();
         }
@@ -222,63 +196,19 @@
         if (response.success) {
           console.log("[v0] LLM Response:", response.data);
 
-          // Create collapsible response block
-          const collapsible = document.createElement("div");
-          collapsible.className = "adam-collapsible expanded";
-          collapsible.innerHTML = `
-            <div class="adam-collapsible-header">
-              <span>🤖 OpenAI Response</span>
-              <span class="adam-collapsible-arrow">▼</span>
-            </div>
-            <div class="adam-collapsible-content">
-              <div class="adam-collapsible-body">${escapeHtml(response.data)}</div>
-            </div>
-          `;
-
-          container.style.flexDirection = "column";
-
-          // Create wrapper for input and button
-          const inputWrapper = container.querySelector(".adam-input-wrapper") || (() => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "adam-input-wrapper";
-            wrapper.style.cssText = "display: flex; gap: 8px; width: 100%;";
-            const inputEl = container.querySelector("#adam-ask-input");
-            const btnEl = container.querySelector("#adam-ask-submit");
-            wrapper.appendChild(inputEl);
-            wrapper.appendChild(btnEl);
-            container.insertBefore(wrapper, container.firstChild);
-            return wrapper;
-          })();
-
-          container.appendChild(collapsible);
-
-          // Toggle collapsible on header click
-          collapsible.querySelector(".adam-collapsible-header").addEventListener("click", () => {
-            collapsible.classList.toggle("expanded");
-          });
+          // Create response block
+          const responseDiv = document.createElement("div");
+          responseDiv.className = "adam-response";
+          responseDiv.textContent = response.data;
+          container.appendChild(responseDiv);
         } else {
           console.error("[v0] Error:", response.error);
 
-          // Create error collapsible block
-          const collapsible = document.createElement("div");
-          collapsible.className = "adam-collapsible expanded";
-          collapsible.innerHTML = `
-            <div class="adam-collapsible-header" style="background: #fee2e2; color: #991b1b;">
-              <span>❌ Error</span>
-              <span class="adam-collapsible-arrow">▼</span>
-            </div>
-            <div class="adam-collapsible-content">
-              <div class="adam-collapsible-body" style="color: #991b1b;">${escapeHtml(response.error)}</div>
-            </div>
-          `;
-
-          container.style.flexDirection = "column";
-          container.appendChild(collapsible);
-
-          // Toggle collapsible on header click
-          collapsible.querySelector(".adam-collapsible-header").addEventListener("click", () => {
-            collapsible.classList.toggle("expanded");
-          });
+          // Create error response block
+          const responseDiv = document.createElement("div");
+          responseDiv.className = "adam-response error";
+          responseDiv.textContent = response.error;
+          container.appendChild(responseDiv);
         }
       }
     );
