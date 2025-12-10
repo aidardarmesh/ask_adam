@@ -4,67 +4,137 @@
   const { selectedText } = await chrome.storage.local.get("selectedText");
   console.log("[v0] Retrieved text:", selectedText);
 
-  // Remove existing dialog if any
-  document.getElementById("llm-dialog-overlay")?.remove();
+  // Remove existing tooltip if any
+  document.getElementById("adam-ask-tooltip")?.remove();
 
-  // Create overlay container
-  const overlay = document.createElement("div");
-  overlay.id = "llm-dialog-overlay";
+  // Get selection position
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
 
-  overlay.innerHTML = `
-    <div id="llm-backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2147483646;"></div>
-    <div id="llm-dialog" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-                background:white;padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.2);
-                z-index:2147483647;width:450px;font-family:system-ui,-apple-system,sans-serif;">
-      <h3 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#111;">Ask LLM</h3>
-      <div style="font-size:13px;color:#666;margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:8px;max-height:100px;overflow-y:auto;">
-        <strong style="color:#333;">Selected text:</strong><br/>
-        <span style="color:#444;">"${selectedText?.replace(/"/g, '&quot;')}"</span>
-      </div>
-      <textarea id="llm-prompt" placeholder="Enter your prompt... (e.g., 'Explain this', 'Summarize', 'Translate to Spanish')" 
-                style="width:100%;height:100px;padding:12px;border:1px solid #ddd;border-radius:8px;resize:none;box-sizing:border-box;font-size:14px;font-family:inherit;"></textarea>
-      <div style="margin-top:16px;display:flex;gap:12px;justify-content:flex-end;">
-        <button id="llm-cancel" style="padding:10px 20px;border:1px solid #ddd;background:white;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:background 0.2s;">Cancel</button>
-        <button id="llm-submit" style="padding:10px 20px;border:none;background:#0070f3;color:white;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:background 0.2s;">Submit</button>
-      </div>
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+
+  // Calculate tooltip position (above the selection)
+  const tooltipWidth = 300;
+  const tooltipHeight = 90; // approximate height including button
+  let left = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
+  let top = rect.top + window.scrollY - tooltipHeight - 8;
+
+  // Keep tooltip within viewport bounds
+  if (left < 10) left = 10;
+  if (left + tooltipWidth > window.innerWidth - 10) {
+    left = window.innerWidth - tooltipWidth - 10;
+  }
+  if (top < 10) {
+    // Show below selection if not enough space above
+    top = rect.bottom + window.scrollY + 8;
+  }
+
+  // Create tooltip container
+  const tooltip = document.createElement("div");
+  tooltip.id = "adam-ask-tooltip";
+
+  tooltip.innerHTML = `
+    <div id="adam-ask-container" style="
+      position: absolute;
+      left: ${left}px;
+      top: ${top}px;
+      width: ${tooltipWidth}px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      z-index: 2147483647;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      gap: 8px;
+    ">
+      <input 
+        id="adam-ask-input" 
+        type="text" 
+        placeholder="Ask about this..." 
+        style="
+          flex: 1;
+          height: 50px;
+          padding: 0 12px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 14px;
+          font-family: inherit;
+          outline: none;
+          box-sizing: border-box;
+        "
+      />
+      <button 
+        id="adam-ask-submit" 
+        style="
+          height: 50px;
+          padding: 0 16px;
+          border: none;
+          background: #0070f3;
+          color: white;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          white-space: nowrap;
+        "
+      >Ask</button>
     </div>
   `;
 
-  document.body.appendChild(overlay);
-  console.log("[v0] Dialog appended to body");
+  document.body.appendChild(tooltip);
+  console.log("[v0] Tooltip appended to body");
 
-  // Focus textarea
-  document.getElementById("llm-prompt").focus();
+  const input = document.getElementById("adam-ask-input");
+  const submitBtn = document.getElementById("adam-ask-submit");
 
-  // Handle cancel
-  document.getElementById("llm-cancel").onclick = () => {
-    console.log("[v0] Cancel clicked");
-    overlay.remove();
-  };
+  // Focus input
+  input.focus();
 
-  // Handle backdrop click
-  document.getElementById("llm-backdrop").onclick = () => {
-    console.log("[v0] Backdrop clicked");
-    overlay.remove();
-  };
+  // Submit function
+  const submitPrompt = () => {
+    const prompt = input.value.trim();
+    if (!prompt) return;
 
-  // Handle submit
-  document.getElementById("llm-submit").onclick = () => {
-    const prompt = document.getElementById("llm-prompt").value;
-    console.log("[v0] Submit clicked");
-    console.log("[v0] Prompt:", prompt);
+    console.log("[v0] Submitting prompt:", prompt);
     console.log("[v0] Context:", selectedText);
 
-    // TODO: Send to LLM API
-    alert(`Prompt: ${prompt}\n\nSelected: ${selectedText}`);
-    overlay.remove();
+    chrome.runtime.sendMessage(
+      { action: "callOpenAI", prompt, context: selectedText },
+      (response) => {
+        if (response.success) {
+          console.log("[v0] LLM Response:", response.data);
+          alert(response.data);
+        } else {
+          console.error("[v0] Error:", response.error);
+          alert("Error: " + response.error);
+        }
+        tooltip.remove();
+      }
+    );
   };
 
-  // Handle Escape key
-  document.addEventListener("keydown", function handler(e) {
+  // Handle Enter key
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submitPrompt();
+    }
     if (e.key === "Escape") {
-      overlay.remove();
-      document.removeEventListener("keydown", handler);
+      tooltip.remove();
+    }
+  });
+
+  // Handle button click
+  submitBtn.onclick = submitPrompt;
+
+  // Close when clicking outside
+  document.addEventListener("mousedown", function handler(e) {
+    const container = document.getElementById("adam-ask-container");
+    if (container && !container.contains(e.target)) {
+      tooltip.remove();
+      document.removeEventListener("mousedown", handler);
     }
   });
 })();

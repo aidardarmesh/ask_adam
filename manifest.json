@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Ask LLM",
+    "name": "Adam Ask",
     "version": "1.0",
     "permissions": [
         "contextMenus",
@@ -13,6 +13,6 @@
         "type": "module"
     },
     "action": {
-        "default_title": "Ask LLM"
+        "default_title": "Adam Ask"
     }
 }
