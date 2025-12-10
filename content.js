@@ -34,6 +34,31 @@
   const tooltip = document.createElement("div");
   tooltip.id = "adam-ask-tooltip";
 
+  // Add loading animation styles
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes adam-dot-pulse {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+    .adam-loading-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .adam-loading-dots span {
+      width: 6px;
+      height: 6px;
+      background-color: white;
+      border-radius: 50%;
+      animation: adam-dot-pulse 1.4s ease-in-out infinite;
+    }
+    .adam-loading-dots span:nth-child(1) { animation-delay: 0s; }
+    .adam-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .adam-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  `;
+  document.head.appendChild(style);
+
   tooltip.innerHTML = `
     <div id="adam-ask-container" style="
       position: absolute;
@@ -78,8 +103,9 @@
           font-size: 14px;
           font-weight: 500;
           white-space: nowrap;
+          min-width: 80px;
         "
-      >Ask</button>
+      >Submit</button>
     </div>
   `;
 
@@ -92,10 +118,20 @@
   // Focus input
   input.focus();
 
+  // Loading animation HTML
+  const loadingDotsHTML = `<span class="adam-loading-dots"><span></span><span></span><span></span></span>`;
+
   // Submit function
   const submitPrompt = () => {
     const prompt = input.value.trim();
     if (!prompt) return;
+
+    // Show loading animation
+    submitBtn.innerHTML = loadingDotsHTML;
+    submitBtn.disabled = true;
+    submitBtn.style.cursor = "not-allowed";
+    submitBtn.style.opacity = "0.8";
+    input.disabled = true;
 
     console.log("[v0] Submitting prompt:", prompt);
     console.log("[v0] Context:", selectedText);
