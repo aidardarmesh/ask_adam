@@ -112,6 +112,11 @@
   `;
   document.head.appendChild(style);
 
+  // Truncate selected text for display
+  const displayText = selectedText.length > 120
+    ? selectedText.substring(0, 120) + "..."
+    : selectedText;
+
   tooltip.innerHTML = `
     <div id="adam-ask-container" style="
       position: absolute;
@@ -125,40 +130,47 @@
       z-index: 2147483647;
       font-family: system-ui, -apple-system, sans-serif;
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 10px;
     ">
-      <input 
-        id="adam-ask-input" 
-        type="text" 
-        placeholder="Ask about this..." 
-        style="
-          flex: 1;
-          height: 50px;
-          padding: 0 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-size: 14px;
-          font-family: inherit;
-          outline: none;
-          box-sizing: border-box;
-        "
-      />
-      <button 
-        id="adam-ask-submit" 
-        style="
-          height: 50px;
-          padding: 0 16px;
-          border: none;
-          background: #0070f3;
-          color: white;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          white-space: nowrap;
-          min-width: 80px;
-        "
-      >Submit</button>
+      <div style="
+        font-size: 13px;
+        color: #495057;
+      ">${escapeHtml(displayText)}</div>
+      <div class="adam-input-wrapper" style="display: flex; gap: 8px;">
+        <input 
+          id="adam-ask-input" 
+          type="text" 
+          placeholder="Ask about this..." 
+          style="
+            flex: 1;
+            height: 50px;
+            padding: 0 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+          "
+        />
+        <button 
+          id="adam-ask-submit" 
+          style="
+            height: 50px;
+            padding: 0 16px;
+            border: none;
+            background: #0070f3;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            min-width: 80px;
+          "
+        >Submit</button>
+      </div>
     </div>
   `;
 
