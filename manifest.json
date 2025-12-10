@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "Ask LLM",
+    "version": "1.0",
+    "description": "Ask LLM about selected text",
+    "permissions": [
+        "contextMenus",
+        "activeTab",
+        "storage"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icon.png"
+    }
+}
