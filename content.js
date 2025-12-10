@@ -15,7 +15,7 @@
   const rect = range.getBoundingClientRect();
 
   // Calculate tooltip position (above the selection)
-  const tooltipWidth = 300;
+  const tooltipWidth = 750;
   const tooltipHeight = 90; // approximate height including button
   let left = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
   let top = rect.top + window.scrollY - tooltipHeight - 8;
