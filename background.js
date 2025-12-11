@@ -43,7 +43,17 @@ async function signIn() {
             isAuthenticated: true
         });
 
-        console.log('Signed in as:', userInfo.email);
+        console.log('=== Authenticated User ===');
+        console.log('Email:', userInfo.email);
+        console.log('Name:', userInfo.name);
+        console.log('Given Name:', userInfo.given_name);
+        console.log('Family Name:', userInfo.family_name);
+        console.log('Picture:', userInfo.picture);
+        console.log('User ID (sub):', userInfo.sub);
+        console.log('Email Verified:', userInfo.email_verified);
+        console.log('Locale:', userInfo.locale);
+        console.log('Full user object:', userInfo);
+        console.log('==========================');
         return { success: true, user: userInfo };
     } catch (error) {
         console.error('Sign in failed:', error);
