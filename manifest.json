@@ -7,8 +7,17 @@
         "contextMenus",
         "activeTab",
         "storage",
-        "scripting"
+        "scripting",
+        "identity"
     ],
+    "oauth2": {
+        "client_id": "105320144052-lfpl0563ffcvh96ek3o3jq8v5om05ki7.apps.googleusercontent.com",
+        "scopes": [
+            "openid",
+            "email",
+            "profile"
+        ]
+    },
     "icons": {
         "16": "icons/icon16.png",
         "32": "icons/icon32.png",
